@@ -1,4 +1,4 @@
-const xofFormatter = new Intl.NumberFormat("fr-SN", {
+const xofFormatter = new Intl.NumberFormat("fr", {
   style: "currency",
   currency: "XOF",
   maximumFractionDigits: 0,

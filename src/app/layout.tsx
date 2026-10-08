@@ -15,7 +15,7 @@ const display = Source_Serif_4({
 export const metadata: Metadata = {
   title: "Pressing Manager",
   description:
-    "Application de gestion pour pressings au Sénégal — commandes, caisse et clients (XOF).",
+    "Application de gestion pour pressings — commandes, caisse et clients (XOF).",
 };
 
 export default function RootLayout({
