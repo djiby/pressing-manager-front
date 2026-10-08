@@ -99,7 +99,32 @@ export default function TarifsPage() {
       ) : (
         <>
           <p className="mb-3 text-sm text-muted">{total} tarif(s)</p>
-          <div className="overflow-x-auto border border-line bg-panel">
+          <div className="grid gap-3 md:hidden">
+            {tarifs.map((tarif) => (
+              <Link
+                key={tarif.id}
+                href={`/tarifs/${tarif.id}`}
+                className="border border-line bg-panel p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-medium text-brand">{tarif.name}</p>
+                  <p className="shrink-0 text-sm font-semibold">
+                    {formatXof(tarif.priceXof)}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm text-muted">
+                  {PRICING_TYPE_LABELS[tarif.type]}
+                </p>
+              </Link>
+            ))}
+            {tarifs.length === 0 && (
+              <p className="border border-line bg-panel px-4 py-8 text-center text-sm text-muted">
+                Aucun tarif trouvé.
+              </p>
+            )}
+          </div>
+
+          <div className="hidden overflow-x-auto border border-line bg-panel md:block">
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-line bg-brand-soft/50">
                 <tr>

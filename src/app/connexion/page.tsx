@@ -33,20 +33,20 @@ export default function ConnexionPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-10 sm:px-6 sm:py-12">
       <p className="mb-3 text-sm font-semibold tracking-[0.18em] text-brand uppercase">
         Pressing Manager
       </p>
-      <h1 className="font-[family-name:var(--font-display)] text-4xl text-foreground">
+      <h1 className="font-[family-name:var(--font-display)] text-3xl text-foreground sm:text-4xl">
         Connexion
       </h1>
-      <p className="mt-2 text-muted">
+      <p className="mt-2 text-sm text-muted sm:text-base">
         Accédez à votre espace de gestion.
       </p>
 
       <form
         onSubmit={onSubmit}
-        className="mt-8 border border-line bg-panel p-6 shadow-[0_20px_60px_rgba(28,42,34,0.08)]"
+        className="mt-8 border border-line bg-panel p-4 shadow-[0_20px_60px_rgba(28,42,34,0.08)] sm:p-6"
       >
         <label className="block text-sm font-medium text-foreground">
           Identifiant

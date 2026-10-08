@@ -110,7 +110,28 @@ export default function ClientsPage() {
               </>
             )}
           </p>
-          <div className="overflow-x-auto border border-line bg-panel">
+          <div className="grid gap-3 md:hidden">
+            {clients.map((client) => (
+              <Link
+                key={client.id}
+                href={`/clients/${client.id}`}
+                className="border border-line bg-panel p-4"
+              >
+                <p className="font-medium text-brand">{client.fullName}</p>
+                <p className="mt-1 text-sm">{client.phoneDisplay}</p>
+                <p className="mt-1 text-sm text-muted">
+                  {client.address || "—"}
+                </p>
+              </Link>
+            ))}
+            {clients.length === 0 && (
+              <p className="border border-line bg-panel px-4 py-8 text-center text-sm text-muted">
+                Aucun client trouvé.
+              </p>
+            )}
+          </div>
+
+          <div className="hidden overflow-x-auto border border-line bg-panel md:block">
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-line bg-brand-soft/50">
                 <tr>
@@ -152,12 +173,12 @@ export default function ClientsPage() {
               <p className="text-sm text-muted">
                 Page {pageIndex + 1} / {totalPages}
               </p>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 <button
                   type="button"
                   disabled={pageIndex <= 0}
                   onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-                  className="border border-line px-3 py-1.5 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border border-line px-3 py-2 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Précédent
                 </button>
@@ -167,7 +188,7 @@ export default function ClientsPage() {
                   onClick={() =>
                     setPageIndex((p) => Math.min(totalPages - 1, p + 1))
                   }
-                  className="border border-line px-3 py-1.5 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border border-line px-3 py-2 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Suivant
                 </button>

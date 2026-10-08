@@ -146,7 +146,26 @@ export default function CommandeDetailPage() {
         </section>
       )}
 
-      <div className="overflow-x-auto border border-line bg-panel">
+      <div className="grid gap-3 md:hidden">
+        {order.lines.map((line) => (
+          <article key={line.id} className="border border-line bg-panel p-4">
+            <div className="flex items-start justify-between gap-3">
+              <p className="font-medium">{line.label}</p>
+              <p className="shrink-0 text-sm font-semibold">
+                {formatXof(line.lineTotalXof)}
+              </p>
+            </div>
+            <p className="mt-1 text-sm text-muted">
+              {PRICING_TYPE_LABELS[line.pricingType]} · Qté {line.quantity}
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              P.U. {formatXof(line.unitPriceXof)}
+            </p>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto border border-line bg-panel md:block">
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-line bg-brand-soft/50">
             <tr>
@@ -185,7 +204,7 @@ export default function CommandeDetailPage() {
           type="button"
           disabled={updating}
           onClick={() => setShowDeleteConfirm(true)}
-          className="mt-6 border border-red-700 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+          className="mt-6 w-full border border-red-700 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60 sm:w-auto"
         >
           Supprimer la commande
         </button>

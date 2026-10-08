@@ -143,7 +143,37 @@ export default function CommandesPage() {
               </>
             )}
           </p>
-          <div className="overflow-x-auto border border-line bg-panel">
+          <div className="grid gap-3 md:hidden">
+            {orders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/commandes/${order.id}`}
+                className="border border-line bg-panel p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-medium text-brand">{order.reference}</p>
+                  <p className="shrink-0 text-sm font-semibold">
+                    {formatXof(order.totalXof)}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm text-muted">
+                  {formatDateTime(order.createdAt)}
+                </p>
+                <p className="mt-2 text-sm">{order.clientName}</p>
+                <p className="text-sm text-muted">{order.clientPhoneDisplay}</p>
+                <p className="mt-2 text-sm font-medium">
+                  {ORDER_STATUS_LABELS[order.status]}
+                </p>
+              </Link>
+            ))}
+            {orders.length === 0 && (
+              <p className="border border-line bg-panel px-4 py-8 text-center text-sm text-muted">
+                Aucune commande trouvée.
+              </p>
+            )}
+          </div>
+
+          <div className="hidden overflow-x-auto border border-line bg-panel md:block">
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-line bg-brand-soft/50">
                 <tr>
@@ -196,12 +226,12 @@ export default function CommandesPage() {
               <p className="text-sm text-muted">
                 Page {pageIndex + 1} / {totalPages}
               </p>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 <button
                   type="button"
                   disabled={pageIndex <= 0}
                   onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-                  className="border border-line px-3 py-1.5 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border border-line px-3 py-2 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Précédent
                 </button>
@@ -211,7 +241,7 @@ export default function CommandesPage() {
                   onClick={() =>
                     setPageIndex((p) => Math.min(totalPages - 1, p + 1))
                   }
-                  className="border border-line px-3 py-1.5 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
+                  className="border border-line px-3 py-2 text-sm hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Suivant
                 </button>

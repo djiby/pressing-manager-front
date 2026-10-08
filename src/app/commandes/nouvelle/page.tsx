@@ -137,7 +137,7 @@ export default function NouvelleCommandePage() {
     >
       <form
         onSubmit={onSubmit}
-        className="grid max-w-3xl gap-4 border border-line bg-panel p-6"
+        className="grid w-full max-w-3xl gap-4 border border-line bg-panel p-4 sm:p-6"
       >
         <div className="text-sm font-medium">
           Client
@@ -149,12 +149,12 @@ export default function NouvelleCommandePage() {
         </div>
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-sm font-semibold">Lignes</h2>
             <button
               type="button"
               onClick={() => setLines((prev) => [...prev, newLine()])}
-              className="border border-line px-3 py-1.5 text-sm hover:bg-brand-soft"
+              className="border border-line px-3 py-2 text-sm hover:bg-brand-soft"
             >
               Ajouter une ligne
             </button>

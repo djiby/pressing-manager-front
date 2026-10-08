@@ -119,7 +119,7 @@ export default function TarifDetailPage() {
     >
       <form
         onSubmit={onSubmit}
-        className="grid max-w-2xl gap-4 border border-line bg-panel p-6"
+        className="grid w-full max-w-2xl gap-4 border border-line bg-panel p-4 sm:p-6"
       >
         <label className="text-sm font-medium">
           Nom
