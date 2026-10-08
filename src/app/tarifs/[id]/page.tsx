@@ -5,18 +5,19 @@ import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { ApiError, deleteClient, getClient, updateClient } from "@/lib/api";
-import type { Client } from "@/types/client";
+import { ApiError, deleteTarif, getTarif, updateTarif } from "@/lib/api";
+import type { PricingType, Tarif } from "@/types/tarif";
+import { PRICING_TYPE_LABELS } from "@/types/tarif";
 
-export default function ClientDetailPage() {
+export default function TarifDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const clientId = Number(params.id);
+  const tarifId = Number(params.id);
 
-  const [client, setClient] = useState<Client | null>(null);
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+  const [tarif, setTarif] = useState<Tarif | null>(null);
+  const [name, setName] = useState("");
+  const [type, setType] = useState<PricingType>("PIECE");
+  const [priceXof, setPriceXof] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,25 +27,31 @@ export default function ClientDetailPage() {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
   useEffect(() => {
-    if (!Number.isFinite(clientId)) {
-      router.replace("/clients");
+    if (!Number.isFinite(tarifId)) {
+      router.replace("/tarifs");
       return;
     }
 
-    getClient(clientId)
+    getTarif(tarifId)
       .then((data) => {
-        setClient(data);
-        setFullName(data.fullName);
-        setPhone(data.phone);
-        setAddress(data.address ?? "");
+        setTarif(data);
+        setName(data.name);
+        setType(data.type);
+        setPriceXof(String(data.priceXof));
       })
-      .catch(() => router.replace("/clients"))
+      .catch(() => router.replace("/tarifs"))
       .finally(() => setLoading(false));
-  }, [clientId, router]);
+  }, [tarifId, router]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!client) {
+    if (!tarif) {
+      return;
+    }
+
+    const price = Number(priceXof);
+    if (!Number.isInteger(price) || price < 1) {
+      setError("Le prix doit être un entier positif en XOF.");
       return;
     }
 
@@ -52,10 +59,10 @@ export default function ClientDetailPage() {
     setError(null);
 
     try {
-      await updateClient(client.id, {
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        address: address.trim() || undefined,
+      await updateTarif(tarif.id, {
+        name: name.trim(),
+        type,
+        priceXof: price,
       });
       setShowSuccess(true);
     } catch (err) {
@@ -68,7 +75,7 @@ export default function ClientDetailPage() {
   }
 
   async function onConfirmDelete() {
-    if (!client) {
+    if (!tarif) {
       return;
     }
 
@@ -76,7 +83,7 @@ export default function ClientDetailPage() {
     setError(null);
 
     try {
-      await deleteClient(client.id);
+      await deleteTarif(tarif.id);
       setShowDeleteConfirm(false);
       setShowDeleteSuccess(true);
     } catch (err) {
@@ -89,9 +96,9 @@ export default function ClientDetailPage() {
     }
   }
 
-  if (loading || !client) {
+  if (loading || !tarif) {
     return (
-      <AppShell title="Client">
+      <AppShell title="Tarif">
         <p className="text-muted">Chargement…</p>
       </AppShell>
     );
@@ -99,48 +106,51 @@ export default function ClientDetailPage() {
 
   return (
     <AppShell
-      title={client.fullName}
-      subtitle={`Fiche client · ${client.phoneDisplay}`}
+      title={tarif.name}
+      subtitle={`${PRICING_TYPE_LABELS[tarif.type]} · édition`}
       actions={
         <Link
-          href="/clients"
+          href="/tarifs"
           className="border border-line bg-panel px-4 py-2 text-sm hover:bg-brand-soft"
         >
-          Liste des clients
+          Liste des tarifs
         </Link>
       }
     >
-      <div className="mb-6 border border-line bg-panel p-4 text-sm text-muted">
-        Historique des commandes : disponible à l&apos;étape Commandes.
-      </div>
-
       <form
         onSubmit={onSubmit}
         className="grid max-w-2xl gap-4 border border-line bg-panel p-6"
       >
         <label className="text-sm font-medium">
-          Nom complet
+          Nom
           <input
             required
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             className="mt-2 w-full border border-line bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
         <label className="text-sm font-medium">
-          Téléphone
-          <input
+          Type
+          <select
             required
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            value={type}
+            onChange={(e) => setType(e.target.value as PricingType)}
             className="mt-2 w-full border border-line bg-white px-3 py-2 outline-none focus:border-brand"
-          />
+          >
+            <option value="KILO">{PRICING_TYPE_LABELS.KILO}</option>
+            <option value="PIECE">{PRICING_TYPE_LABELS.PIECE}</option>
+          </select>
         </label>
         <label className="text-sm font-medium">
-          Adresse
+          Prix (XOF)
           <input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            required
+            type="number"
+            min={1}
+            step={1}
+            value={priceXof}
+            onChange={(e) => setPriceXof(e.target.value)}
             className="mt-2 w-full border border-line bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
@@ -169,15 +179,15 @@ export default function ClientDetailPage() {
       <ConfirmDialog
         open={showSuccess}
         title="Enregistrement réussi"
-        message="Les modifications du client ont bien été enregistrées."
+        message="Les modifications du tarif ont bien été enregistrées."
         confirmLabel="Retour à la liste"
-        onConfirm={() => router.replace("/clients")}
+        onConfirm={() => router.replace("/tarifs")}
       />
 
       <ConfirmDialog
         open={showDeleteConfirm}
-        title="Supprimer ce client ?"
-        message={`Le client « ${client.fullName} » sera définitivement supprimé.`}
+        title="Supprimer ce tarif ?"
+        message={`Le tarif « ${tarif.name} » sera définitivement supprimé.`}
         confirmLabel={deleting ? "Suppression…" : "Supprimer"}
         cancelLabel="Annuler"
         danger
@@ -191,10 +201,10 @@ export default function ClientDetailPage() {
 
       <ConfirmDialog
         open={showDeleteSuccess}
-        title="Client supprimé"
-        message="Le client a bien été supprimé."
+        title="Tarif supprimé"
+        message="Le tarif a bien été supprimé."
         confirmLabel="Retour à la liste"
-        onConfirm={() => router.replace("/clients")}
+        onConfirm={() => router.replace("/tarifs")}
       />
     </AppShell>
   );

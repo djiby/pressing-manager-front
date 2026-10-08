@@ -5,7 +5,10 @@ type ConfirmDialogProps = {
   title: string;
   message: string;
   confirmLabel?: string;
+  cancelLabel?: string;
+  danger?: boolean;
   onConfirm: () => void;
+  onCancel?: () => void;
 };
 
 export function ConfirmDialog({
@@ -13,7 +16,10 @@ export function ConfirmDialog({
   title,
   message,
   confirmLabel = "OK",
+  cancelLabel,
+  danger = false,
   onConfirm,
+  onCancel,
 }: ConfirmDialogProps) {
   if (!open) {
     return null;
@@ -34,11 +40,24 @@ export function ConfirmDialog({
           {title}
         </h2>
         <p className="mt-3 text-sm text-muted">{message}</p>
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex justify-end gap-3">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="border border-line bg-white px-4 py-2 text-sm font-medium hover:bg-brand-soft"
+            >
+              {cancelLabel ?? "Annuler"}
+            </button>
+          )}
           <button
             type="button"
             onClick={onConfirm}
-            className="bg-brand px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            className={
+              danger
+                ? "bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+                : "bg-brand px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            }
             autoFocus
           >
             {confirmLabel}

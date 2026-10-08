@@ -10,6 +10,7 @@ import type { User } from "@/types/auth";
 const links = [
   { href: "/tableau-de-bord", label: "Tableau de bord" },
   { href: "/clients", label: "Clients" },
+  { href: "/tarifs", label: "Tarifs" },
 ];
 
 type AppShellProps = {

@@ -8,14 +8,6 @@ export type Client = {
   updatedAt: string;
 };
 
-export type PageResponse<T> = {
-  content: T[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-};
-
 export type ClientPayload = {
   fullName: string;
   phone: string;

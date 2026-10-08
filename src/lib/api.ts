@@ -1,6 +1,8 @@
 import { getAccessToken, clearSession } from "@/lib/auth";
+import type { PageResponse } from "@/types/api";
 import type { LoginResponse, User } from "@/types/auth";
-import type { Client, ClientPayload, PageResponse } from "@/types/client";
+import type { Client, ClientPayload } from "@/types/client";
+import type { PricingType, Tarif, TarifPayload } from "@/types/tarif";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
@@ -127,6 +129,74 @@ export async function updateClient(
     {
       method: "PUT",
       body: JSON.stringify(payload),
+    },
+    true,
+  );
+}
+
+export async function deleteClient(id: number): Promise<void> {
+  return apiFetch<void>(
+    `/clients/${id}`,
+    {
+      method: "DELETE",
+    },
+    true,
+  );
+}
+
+export async function searchTarifs(
+  q = "",
+  type?: PricingType | "",
+  page = 0,
+  size = 50,
+): Promise<PageResponse<Tarif>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+  if (q.trim()) {
+    params.set("q", q.trim());
+  }
+  if (type) {
+    params.set("type", type);
+  }
+  return apiFetch<PageResponse<Tarif>>(`/tarifs?${params}`, {}, true);
+}
+
+export async function getTarif(id: number): Promise<Tarif> {
+  return apiFetch<Tarif>(`/tarifs/${id}`, {}, true);
+}
+
+export async function createTarif(payload: TarifPayload): Promise<Tarif> {
+  return apiFetch<Tarif>(
+    "/tarifs",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
+}
+
+export async function updateTarif(
+  id: number,
+  payload: TarifPayload,
+): Promise<Tarif> {
+  return apiFetch<Tarif>(
+    `/tarifs/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
+}
+
+export async function deleteTarif(id: number): Promise<void> {
+  return apiFetch<void>(
+    `/tarifs/${id}`,
+    {
+      method: "DELETE",
     },
     true,
   );

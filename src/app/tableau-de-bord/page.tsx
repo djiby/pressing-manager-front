@@ -17,7 +17,7 @@ export default function TableauDeBordPage() {
           <h2 className="text-sm text-muted">Module disponible</h2>
           <p className="mt-2 text-lg font-semibold">Clients</p>
           <p className="mt-1 text-sm text-muted">
-            Création, recherche téléphone, fiche client.
+            Création, recherche, fiche client.
           </p>
           <Link
             href="/clients"
@@ -27,11 +27,17 @@ export default function TableauDeBordPage() {
           </Link>
         </article>
         <article className="border border-line bg-panel p-5">
-          <h2 className="text-sm text-muted">Prochaine étape</h2>
+          <h2 className="text-sm text-muted">Module disponible</h2>
           <p className="mt-2 text-lg font-semibold">Tarifs</p>
           <p className="mt-1 text-sm text-muted">
-            Grille kilo / pièce / forfait en XOF.
+            Grille kilo / pièce en XOF.
           </p>
+          <Link
+            href="/tarifs"
+            className="mt-4 inline-block text-sm font-semibold text-brand hover:underline"
+          >
+            Ouvrir les tarifs
+          </Link>
         </article>
       </section>
     </AppShell>
