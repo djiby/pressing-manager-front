@@ -2,6 +2,11 @@ import { getAccessToken, clearSession } from "@/lib/auth";
 import type { PageResponse } from "@/types/api";
 import type { LoginResponse, User } from "@/types/auth";
 import type { Client, ClientPayload } from "@/types/client";
+import type {
+  Order,
+  OrderPayload,
+  OrderStatus,
+} from "@/types/order";
 import type { PricingType, Tarif, TarifPayload } from "@/types/tarif";
 
 export const API_BASE_URL =
@@ -93,7 +98,7 @@ export async function fetchMe(): Promise<User> {
 export async function searchClients(
   q = "",
   page = 0,
-  size = 20,
+  size = 5,
 ): Promise<PageResponse<Client>> {
   const params = new URLSearchParams({
     page: String(page),
@@ -195,6 +200,68 @@ export async function updateTarif(
 export async function deleteTarif(id: number): Promise<void> {
   return apiFetch<void>(
     `/tarifs/${id}`,
+    {
+      method: "DELETE",
+    },
+    true,
+  );
+}
+
+export async function searchOrders(
+  q = "",
+  status?: OrderStatus | "",
+  clientId?: number,
+  page = 0,
+  size = 5,
+): Promise<PageResponse<Order>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(size),
+  });
+  if (q.trim()) {
+    params.set("q", q.trim());
+  }
+  if (status) {
+    params.set("status", status);
+  }
+  if (clientId) {
+    params.set("clientId", String(clientId));
+  }
+  return apiFetch<PageResponse<Order>>(`/commandes?${params}`, {}, true);
+}
+
+export async function getOrder(id: number): Promise<Order> {
+  return apiFetch<Order>(`/commandes/${id}`, {}, true);
+}
+
+export async function createOrder(payload: OrderPayload): Promise<Order> {
+  return apiFetch<Order>(
+    "/commandes",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
+}
+
+export async function updateOrderStatus(
+  id: number,
+  status: OrderStatus,
+): Promise<Order> {
+  return apiFetch<Order>(
+    `/commandes/${id}/status`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    },
+    true,
+  );
+}
+
+export async function deleteOrder(id: number): Promise<void> {
+  return apiFetch<void>(
+    `/commandes/${id}`,
     {
       method: "DELETE",
     },

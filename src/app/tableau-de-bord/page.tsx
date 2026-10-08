@@ -12,31 +12,35 @@ export default function TableauDeBordPage() {
       title="Tableau de bord"
       subtitle={`Bienvenue${user ? `, ${user.fullName}` : ""}. Les indicateurs métier arriveront plus tard.`}
     >
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-3">
         <article className="border border-line bg-panel p-5">
           <h2 className="text-sm text-muted">Module disponible</h2>
           <p className="mt-2 text-lg font-semibold">Clients</p>
-          <p className="mt-1 text-sm text-muted">
-            Création, recherche, fiche client.
-          </p>
           <Link
             href="/clients"
             className="mt-4 inline-block text-sm font-semibold text-brand hover:underline"
           >
-            Ouvrir les clients
+            Ouvrir
+          </Link>
+        </article>
+        <article className="border border-line bg-panel p-5">
+          <h2 className="text-sm text-muted">Module disponible</h2>
+          <p className="mt-2 text-lg font-semibold">Commandes</p>
+          <Link
+            href="/commandes"
+            className="mt-4 inline-block text-sm font-semibold text-brand hover:underline"
+          >
+            Ouvrir
           </Link>
         </article>
         <article className="border border-line bg-panel p-5">
           <h2 className="text-sm text-muted">Module disponible</h2>
           <p className="mt-2 text-lg font-semibold">Tarifs</p>
-          <p className="mt-1 text-sm text-muted">
-            Grille kilo / pièce en XOF.
-          </p>
           <Link
             href="/tarifs"
             className="mt-4 inline-block text-sm font-semibold text-brand hover:underline"
           >
-            Ouvrir les tarifs
+            Ouvrir
           </Link>
         </article>
       </section>
