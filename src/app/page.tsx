@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { isAuthenticated } from "@/lib/auth";
+import { homePathForUser, isAuthenticated } from "@/lib/auth";
 
 export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace(isAuthenticated() ? "/tableau-de-bord" : "/connexion");
+    router.replace(isAuthenticated() ? homePathForUser() : "/connexion");
   }, [router]);
 
   return (

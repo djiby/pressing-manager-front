@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ApiError, deleteClient, getClient, updateClient } from "@/lib/api";
+import { isAdmin } from "@/lib/auth";
 import type { Client } from "@/types/client";
 
 export default function ClientDetailPage() {
@@ -155,14 +156,16 @@ export default function ClientDetailPage() {
           >
             {saving ? "Enregistrement…" : "Enregistrer les modifications"}
           </button>
-          <button
-            type="button"
-            disabled={saving || deleting}
-            onClick={() => setShowDeleteConfirm(true)}
-            className="border border-red-700 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
-          >
-            Supprimer
-          </button>
+          {isAdmin() && (
+            <button
+              type="button"
+              disabled={saving || deleting}
+              onClick={() => setShowDeleteConfirm(true)}
+              className="border border-red-700 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+            >
+              Supprimer
+            </button>
+          )}
         </div>
       </form>
 

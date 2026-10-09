@@ -1,7 +1,28 @@
-import type { LoginResponse, User } from "@/types/auth";
+import type { LoginResponse, Role, User } from "@/types/auth";
 
 const TOKEN_KEY = "pm_access_token";
 const USER_KEY = "pm_user";
+
+export function hasRole(user: User | null | undefined, role: Role): boolean {
+  return Boolean(user?.roles.includes(role));
+}
+
+export function isAdmin(user: User | null | undefined = getStoredUser()): boolean {
+  return hasRole(user, "ADMIN");
+}
+
+/** Utilisateur PRESSING sans rôle ADMIN : accès limité aux commandes. */
+export function isPressingOnly(
+  user: User | null | undefined = getStoredUser(),
+): boolean {
+  return hasRole(user, "PRESSING") && !hasRole(user, "ADMIN");
+}
+
+export function homePathForUser(
+  user: User | null | undefined = getStoredUser(),
+): string {
+  return isPressingOnly(user) ? "/commandes" : "/tableau-de-bord";
+}
 
 export function saveSession(login: LoginResponse): void {
   if (typeof window === "undefined") {

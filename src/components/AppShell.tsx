@@ -4,14 +4,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { fetchMe } from "@/lib/api";
-import { clearSession, getStoredUser, isAuthenticated } from "@/lib/auth";
+import {
+  clearSession,
+  getStoredUser,
+  isAuthenticated,
+  isPressingOnly,
+} from "@/lib/auth";
 import type { User } from "@/types/auth";
 
 const links = [
-  { href: "/tableau-de-bord", label: "Tableau de bord" },
-  { href: "/clients", label: "Clients" },
-  { href: "/commandes", label: "Commandes" },
-  { href: "/tarifs", label: "Tarifs" },
+  { href: "/tableau-de-bord", label: "Tableau de bord", adminOnly: true },
+  { href: "/clients", label: "Clients", adminOnly: false },
+  { href: "/commandes", label: "Commandes", adminOnly: false },
+  { href: "/tarifs", label: "Tarifs", adminOnly: true },
+  { href: "/utilisateurs", label: "Utilisateurs", adminOnly: true },
 ];
 
 type AppShellProps = {
@@ -53,6 +59,19 @@ export function AppShell({ title, subtitle, actions, children }: AppShellProps) 
   }, [pathname]);
 
   useEffect(() => {
+    if (!user || !isPressingOnly(user)) {
+      return;
+    }
+    const allowed =
+      pathname.startsWith("/commandes") ||
+      pathname.startsWith("/clients") ||
+      pathname.startsWith("/connexion");
+    if (!allowed) {
+      router.replace("/commandes");
+    }
+  }, [user, pathname, router]);
+
+  useEffect(() => {
     if (!menuOpen) {
       return;
     }
@@ -82,9 +101,13 @@ export function AppShell({ title, subtitle, actions, children }: AppShellProps) 
     );
   }
 
+  const visibleLinks = links.filter(
+    (link) => !link.adminOnly || !isPressingOnly(user),
+  );
+
   const navLinks = (
     <nav className="grid gap-1.5">
-      {links.map((link) => {
+      {visibleLinks.map((link) => {
         const active = pathname.startsWith(link.href);
         return (
           <Link

@@ -11,6 +11,7 @@ import {
   getOrder,
   updateOrderStatus,
 } from "@/lib/api";
+import { isAdmin } from "@/lib/auth";
 import { formatXof } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types/order";
 import {
@@ -93,7 +94,7 @@ export default function CommandeDetailPage() {
   }
 
   const nextStatuses = ORDER_STATUS_TRANSITIONS[order.status];
-  const canDelete = order.status === "RECEPTIONNEE";
+  const canDelete = isAdmin() && order.status === "RECEPTIONNEE";
 
   return (
     <AppShell

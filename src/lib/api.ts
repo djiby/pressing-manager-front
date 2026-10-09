@@ -1,6 +1,11 @@
 import { getAccessToken, clearSession } from "@/lib/auth";
 import type { PageResponse } from "@/types/api";
-import type { LoginResponse, User } from "@/types/auth";
+import type {
+  CreateUserPayload,
+  LoginResponse,
+  UpdateUserPayload,
+  User,
+} from "@/types/auth";
 import type { Client, ClientPayload } from "@/types/client";
 import type {
   Order,
@@ -93,6 +98,39 @@ export async function login(
 
 export async function fetchMe(): Promise<User> {
   return apiFetch<User>("/auth/me", {}, true);
+}
+
+export async function listUsers(): Promise<User[]> {
+  return apiFetch<User[]>("/users", {}, true);
+}
+
+export async function getUser(id: number): Promise<User> {
+  return apiFetch<User>(`/users/${id}`, {}, true);
+}
+
+export async function createUser(payload: CreateUserPayload): Promise<User> {
+  return apiFetch<User>(
+    "/users",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
+}
+
+export async function updateUser(
+  id: number,
+  payload: UpdateUserPayload,
+): Promise<User> {
+  return apiFetch<User>(
+    `/users/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    true,
+  );
 }
 
 export async function searchClients(

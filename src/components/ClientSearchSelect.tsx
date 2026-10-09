@@ -8,12 +8,14 @@ type ClientSearchSelectProps = {
   value: Client | null;
   onChange: (client: Client | null) => void;
   disabled?: boolean;
+  allowCreate?: boolean;
 };
 
 export function ClientSearchSelect({
   value,
   onChange,
   disabled = false,
+  allowCreate = true,
 }: ClientSearchSelectProps) {
   const listId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -120,7 +122,7 @@ export function ClientSearchSelect({
     );
   }
 
-  if (createMode) {
+  if (createMode && allowCreate) {
     return (
       <div className="mt-2 grid gap-3 border border-line bg-white p-4">
         <p className="text-sm font-semibold text-foreground">Nouveau client</p>
@@ -221,14 +223,16 @@ export function ClientSearchSelect({
           }}
           className="w-full border border-line bg-white px-3 py-2 outline-none focus:border-brand disabled:opacity-60"
         />
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => openCreateForm(query.trim())}
-          className="shrink-0 border border-line bg-panel px-3 py-2 text-sm font-medium hover:bg-brand-soft disabled:opacity-60"
-        >
-          Nouveau client
-        </button>
+        {allowCreate && (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => openCreateForm(query.trim())}
+            className="shrink-0 border border-line bg-panel px-3 py-2 text-sm font-medium hover:bg-brand-soft disabled:opacity-60"
+          >
+            Nouveau client
+          </button>
+        )}
       </div>
 
       {open && (
@@ -243,13 +247,15 @@ export function ClientSearchSelect({
           {!loading && results.length === 0 && (
             <li className="px-3 py-2">
               <p className="text-sm text-muted">Aucun client trouvé</p>
-              <button
-                type="button"
-                className="mt-2 text-sm font-semibold text-brand hover:underline"
-                onClick={() => openCreateForm(query.trim())}
-              >
-                Créer un nouveau client
-              </button>
+              {allowCreate && (
+                <button
+                  type="button"
+                  className="mt-2 text-sm font-semibold text-brand hover:underline"
+                  onClick={() => openCreateForm(query.trim())}
+                >
+                  Créer un nouveau client
+                </button>
+              )}
             </li>
           )}
           {!loading &&

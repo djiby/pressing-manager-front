@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, login } from "@/lib/api";
-import { saveSession } from "@/lib/auth";
+import { homePathForUser, saveSession } from "@/lib/auth";
 
 export default function ConnexionPage() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function ConnexionPage() {
     try {
       const session = await login(username.trim(), password);
       saveSession(session);
-      router.replace("/tableau-de-bord");
+      router.replace(homePathForUser(session.user));
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
