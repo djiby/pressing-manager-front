@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { SortableTh } from "@/components/SortableTh";
 import { ApiError, searchTarifs } from "@/lib/api";
 import { formatXof } from "@/lib/format";
+import { sortRows, toggleSort, type SortState } from "@/lib/sort";
 import type { PricingType, Tarif } from "@/types/tarif";
 import { PRICING_TYPE_LABELS } from "@/types/tarif";
+
+type TarifSortKey = "name" | "type" | "priceXof";
 
 export default function TarifsPage() {
   const [query, setQuery] = useState("");
@@ -15,6 +19,10 @@ export default function TarifsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortState<TarifSortKey>>({
+    key: "name",
+    direction: "asc",
+  });
 
   async function load(q = query, selectedType = type) {
     setLoading(true);
@@ -41,6 +49,23 @@ export default function TarifsPage() {
     return () => window.clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, type]);
+
+  const sortedTarifs = useMemo(
+    () =>
+      sortRows(tarifs, sort, (tarif, key) => {
+        switch (key as TarifSortKey) {
+          case "name":
+            return tarif.name;
+          case "type":
+            return PRICING_TYPE_LABELS[tarif.type];
+          case "priceXof":
+            return tarif.priceXof;
+          default:
+            return null;
+        }
+      }),
+    [tarifs, sort],
+  );
 
   function onSearch(event: FormEvent) {
     event.preventDefault();
@@ -100,7 +125,7 @@ export default function TarifsPage() {
         <>
           <p className="mb-3 text-sm text-muted">{total} tarif(s)</p>
           <div className="grid gap-3 md:hidden">
-            {tarifs.map((tarif) => (
+            {sortedTarifs.map((tarif) => (
               <Link
                 key={tarif.id}
                 href={`/tarifs/${tarif.id}`}
@@ -117,7 +142,7 @@ export default function TarifsPage() {
                 </p>
               </Link>
             ))}
-            {tarifs.length === 0 && (
+            {sortedTarifs.length === 0 && (
               <p className="border border-line bg-panel px-4 py-8 text-center text-sm text-muted">
                 Aucun tarif trouvé.
               </p>
@@ -128,13 +153,28 @@ export default function TarifsPage() {
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-line bg-brand-soft/50">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Nom</th>
-                  <th className="px-4 py-3 font-semibold">Type</th>
-                  <th className="px-4 py-3 font-semibold">Prix</th>
+                  <SortableTh
+                    label="Nom"
+                    column="name"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Type"
+                    column="type"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Prix"
+                    column="priceXof"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
                 </tr>
               </thead>
               <tbody>
-                {tarifs.map((tarif) => (
+                {sortedTarifs.map((tarif) => (
                   <tr key={tarif.id} className="border-b border-line last:border-0">
                     <td className="px-4 py-3">
                       <Link
@@ -152,7 +192,7 @@ export default function TarifsPage() {
                     </td>
                   </tr>
                 ))}
-                {tarifs.length === 0 && (
+                {sortedTarifs.length === 0 && (
                   <tr>
                     <td colSpan={3} className="px-4 py-8 text-center text-muted">
                       Aucun tarif trouvé.

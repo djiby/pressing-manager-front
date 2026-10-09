@@ -11,6 +11,7 @@ import type {
   Order,
   OrderPayload,
   OrderStatus,
+  PaymentMethod,
 } from "@/types/order";
 import type { PricingType, Tarif, TarifPayload } from "@/types/tarif";
 
@@ -286,12 +287,13 @@ export async function createOrder(payload: OrderPayload): Promise<Order> {
 export async function updateOrderStatus(
   id: number,
   status: OrderStatus,
+  paymentMethod: PaymentMethod | null = null,
 ): Promise<Order> {
   return apiFetch<Order>(
     `/commandes/${id}/status`,
     {
       method: "PUT",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status, paymentMethod }),
     },
     true,
   );
@@ -305,4 +307,32 @@ export async function deleteOrder(id: number): Promise<void> {
     },
     true,
   );
+}
+
+export async function downloadInvoicePdf(
+  invoiceId: number,
+  fileName: string,
+): Promise<void> {
+  const token = getAccessToken();
+  const response = await fetch(`${API_BASE_URL}/factures/${invoiceId}/pdf`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    cache: "no-store",
+  });
+
+  if (response.status === 401) {
+    clearSession();
+  }
+  if (!response.ok) {
+    throw new ApiError(response.status, await parseError(response));
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName.endsWith(".pdf") ? fileName : `${fileName}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }

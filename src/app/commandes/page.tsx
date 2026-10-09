@@ -1,14 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { SortableTh } from "@/components/SortableTh";
 import { ApiError, searchOrders } from "@/lib/api";
 import { formatDateTime, formatXof } from "@/lib/format";
+import { sortRows, toggleSort, type SortState } from "@/lib/sort";
 import type { Order, OrderStatus } from "@/types/order";
-import { ORDER_STATUS_LABELS } from "@/types/order";
+import {
+  ORDER_STATUS_LABELS,
+  paymentLabel,
+} from "@/types/order";
 
 const PAGE_SIZE = 5;
+
+type OrderSortKey =
+  | "reference"
+  | "createdAt"
+  | "clientName"
+  | "status"
+  | "payment"
+  | "totalXof";
 
 export default function CommandesPage() {
   const [query, setQuery] = useState("");
@@ -19,6 +32,10 @@ export default function CommandesPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortState<OrderSortKey>>({
+    key: "createdAt",
+    direction: "desc",
+  });
 
   async function load(
     q = query,
@@ -57,6 +74,29 @@ export default function CommandesPage() {
     return () => window.clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, status, pageIndex]);
+
+  const sortedOrders = useMemo(
+    () =>
+      sortRows(orders, sort, (order, key) => {
+        switch (key as OrderSortKey) {
+          case "reference":
+            return order.reference;
+          case "createdAt":
+            return order.createdAt;
+          case "clientName":
+            return order.clientName;
+          case "status":
+            return ORDER_STATUS_LABELS[order.status];
+          case "payment":
+            return paymentLabel(order);
+          case "totalXof":
+            return order.totalXof;
+          default:
+            return null;
+        }
+      }),
+    [orders, sort],
+  );
 
   function onSearch(event: FormEvent) {
     event.preventDefault();
@@ -144,7 +184,7 @@ export default function CommandesPage() {
             )}
           </p>
           <div className="grid gap-3 md:hidden">
-            {orders.map((order) => (
+            {sortedOrders.map((order) => (
               <Link
                 key={order.id}
                 href={`/commandes/${order.id}`}
@@ -164,9 +204,12 @@ export default function CommandesPage() {
                 <p className="mt-2 text-sm font-medium">
                   {ORDER_STATUS_LABELS[order.status]}
                 </p>
+                <p className="mt-1 text-sm text-muted">
+                  {paymentLabel(order)}
+                </p>
               </Link>
             ))}
-            {orders.length === 0 && (
+            {sortedOrders.length === 0 && (
               <p className="border border-line bg-panel px-4 py-8 text-center text-sm text-muted">
                 Aucune commande trouvée.
               </p>
@@ -177,15 +220,46 @@ export default function CommandesPage() {
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-line bg-brand-soft/50">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Référence</th>
-                  <th className="px-4 py-3 font-semibold">Date</th>
-                  <th className="px-4 py-3 font-semibold">Client</th>
-                  <th className="px-4 py-3 font-semibold">Statut</th>
-                  <th className="px-4 py-3 font-semibold">Total</th>
+                  <SortableTh
+                    label="Référence"
+                    column="reference"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Date"
+                    column="createdAt"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Client"
+                    column="clientName"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Statut"
+                    column="status"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Paiement"
+                    column="payment"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Total"
+                    column="totalXof"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order) => (
+                {sortedOrders.map((order) => (
                   <tr key={order.id} className="border-b border-line last:border-0">
                     <td className="px-4 py-3">
                       <Link
@@ -205,14 +279,15 @@ export default function CommandesPage() {
                     <td className="px-4 py-3">
                       {ORDER_STATUS_LABELS[order.status]}
                     </td>
+                    <td className="px-4 py-3">{paymentLabel(order)}</td>
                     <td className="px-4 py-3 font-medium">
                       {formatXof(order.totalXof)}
                     </td>
                   </tr>
                 ))}
-                {orders.length === 0 && (
+                {sortedOrders.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-muted">
+                    <td colSpan={6} className="px-4 py-8 text-center text-muted">
                       Aucune commande trouvée.
                     </td>
                   </tr>

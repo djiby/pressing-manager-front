@@ -1,16 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { SortableTh } from "@/components/SortableTh";
 import { ApiError, listUsers } from "@/lib/api";
+import { sortRows, toggleSort, type SortState } from "@/lib/sort";
 import type { User } from "@/types/auth";
 import { ROLE_LABELS } from "@/types/auth";
+
+type UserSortKey = "fullName" | "username" | "roles" | "active";
 
 export default function UtilisateursPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortState<UserSortKey>>({
+    key: "fullName",
+    direction: "asc",
+  });
 
   useEffect(() => {
     listUsers()
@@ -24,6 +32,25 @@ export default function UtilisateursPage() {
       )
       .finally(() => setLoading(false));
   }, []);
+
+  const sortedUsers = useMemo(
+    () =>
+      sortRows(users, sort, (user, key) => {
+        switch (key as UserSortKey) {
+          case "fullName":
+            return user.fullName;
+          case "username":
+            return user.username;
+          case "roles":
+            return user.roles.map((role) => ROLE_LABELS[role]).join(", ");
+          case "active":
+            return user.active ? 1 : 0;
+          default:
+            return null;
+        }
+      }),
+    [users, sort],
+  );
 
   return (
     <AppShell
@@ -46,7 +73,7 @@ export default function UtilisateursPage() {
           <p className="mb-3 text-sm text-muted">{users.length} utilisateur(s)</p>
 
           <div className="grid gap-3 md:hidden">
-            {users.map((user) => (
+            {sortedUsers.map((user) => (
               <Link
                 key={user.id}
                 href={`/utilisateurs/${user.id}`}
@@ -70,7 +97,7 @@ export default function UtilisateursPage() {
                 </p>
               </Link>
             ))}
-            {users.length === 0 && (
+            {sortedUsers.length === 0 && (
               <p className="border border-line bg-panel px-4 py-8 text-center text-sm text-muted">
                 Aucun utilisateur.
               </p>
@@ -81,14 +108,34 @@ export default function UtilisateursPage() {
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-line bg-brand-soft/50">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Nom</th>
-                  <th className="px-4 py-3 font-semibold">Identifiant</th>
-                  <th className="px-4 py-3 font-semibold">Rôles</th>
-                  <th className="px-4 py-3 font-semibold">Statut</th>
+                  <SortableTh
+                    label="Nom"
+                    column="fullName"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Identifiant"
+                    column="username"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Rôles"
+                    column="roles"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Statut"
+                    column="active"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {sortedUsers.map((user) => (
                   <tr key={user.id} className="border-b border-line last:border-0">
                     <td className="px-4 py-3">
                       <Link
@@ -107,7 +154,7 @@ export default function UtilisateursPage() {
                     </td>
                   </tr>
                 ))}
-                {users.length === 0 && (
+                {sortedUsers.length === 0 && (
                   <tr>
                     <td colSpan={4} className="px-4 py-8 text-center text-muted">
                       Aucun utilisateur.

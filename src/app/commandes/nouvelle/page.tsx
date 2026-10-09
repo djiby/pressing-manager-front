@@ -9,6 +9,11 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ApiError, createOrder, searchTarifs } from "@/lib/api";
 import { formatXof } from "@/lib/format";
 import type { Client } from "@/types/client";
+import type { PaymentMethod } from "@/types/order";
+import {
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_METHODS,
+} from "@/types/order";
 import type { Tarif } from "@/types/tarif";
 import { PRICING_TYPE_LABELS } from "@/types/tarif";
 
@@ -31,6 +36,7 @@ export default function NouvelleCommandePage() {
   const [tarifs, setTarifs] = useState<Tarif[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [lines, setLines] = useState<DraftLine[]>([newLine()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -101,6 +107,7 @@ export default function NouvelleCommandePage() {
         clientId: selectedClient.id,
         notes: notes.trim() || undefined,
         lines: payloadLines,
+        paymentMethod: paymentMethod || null,
       });
       setShowSuccess(true);
     } catch (err) {
@@ -224,6 +231,37 @@ export default function NouvelleCommandePage() {
             className="mt-2 w-full border border-line bg-white px-3 py-2 outline-none focus:border-brand"
           />
         </label>
+
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium">Paiement</legend>
+          <div className="flex flex-wrap gap-4">
+            {PAYMENT_METHODS.map((method) => (
+              <label
+                key={method}
+                className="flex items-center gap-2 text-sm font-medium"
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value={method}
+                  checked={paymentMethod === method}
+                  onChange={() => setPaymentMethod(method)}
+                  className="size-4 accent-[var(--brand)]"
+                />
+                {PAYMENT_METHOD_LABELS[method]}
+              </label>
+            ))}
+          </div>
+          {paymentMethod && (
+            <button
+              type="button"
+              onClick={() => setPaymentMethod("")}
+              className="text-sm text-muted underline hover:text-ink"
+            >
+              Annuler le paiement
+            </button>
+          )}
+        </fieldset>
 
         <p className="text-sm">
           Total estimé :{" "}

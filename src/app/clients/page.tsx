@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { SortableTh } from "@/components/SortableTh";
 import { ApiError, searchClients } from "@/lib/api";
+import { sortRows, toggleSort, type SortState } from "@/lib/sort";
 import type { Client } from "@/types/client";
 
 const PAGE_SIZE = 5;
+
+type ClientSortKey = "fullName" | "phoneDisplay" | "address";
 
 export default function ClientsPage() {
   const [query, setQuery] = useState("");
@@ -16,6 +20,10 @@ export default function ClientsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortState<ClientSortKey>>({
+    key: "fullName",
+    direction: "asc",
+  });
 
   async function load(q = query, page = pageIndex) {
     setLoading(true);
@@ -44,6 +52,23 @@ export default function ClientsPage() {
     return () => window.clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, pageIndex]);
+
+  const sortedClients = useMemo(
+    () =>
+      sortRows(clients, sort, (client, key) => {
+        switch (key as ClientSortKey) {
+          case "fullName":
+            return client.fullName;
+          case "phoneDisplay":
+            return client.phoneDisplay;
+          case "address":
+            return client.address ?? "";
+          default:
+            return null;
+        }
+      }),
+    [clients, sort],
+  );
 
   function onSearch(event: FormEvent) {
     event.preventDefault();
@@ -111,7 +136,7 @@ export default function ClientsPage() {
             )}
           </p>
           <div className="grid gap-3 md:hidden">
-            {clients.map((client) => (
+            {sortedClients.map((client) => (
               <Link
                 key={client.id}
                 href={`/clients/${client.id}`}
@@ -124,7 +149,7 @@ export default function ClientsPage() {
                 </p>
               </Link>
             ))}
-            {clients.length === 0 && (
+            {sortedClients.length === 0 && (
               <p className="border border-line bg-panel px-4 py-8 text-center text-sm text-muted">
                 Aucun client trouvé.
               </p>
@@ -135,13 +160,28 @@ export default function ClientsPage() {
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-line bg-brand-soft/50">
                 <tr>
-                  <th className="px-4 py-3 font-semibold">Nom</th>
-                  <th className="px-4 py-3 font-semibold">Téléphone</th>
-                  <th className="px-4 py-3 font-semibold">Adresse</th>
+                  <SortableTh
+                    label="Nom"
+                    column="fullName"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Téléphone"
+                    column="phoneDisplay"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
+                  <SortableTh
+                    label="Adresse"
+                    column="address"
+                    sort={sort}
+                    onSort={(column) => setSort((s) => toggleSort(s, column))}
+                  />
                 </tr>
               </thead>
               <tbody>
-                {clients.map((client) => (
+                {sortedClients.map((client) => (
                   <tr key={client.id} className="border-b border-line last:border-0">
                     <td className="px-4 py-3">
                       <Link
@@ -157,7 +197,7 @@ export default function ClientsPage() {
                     </td>
                   </tr>
                 ))}
-                {clients.length === 0 && (
+                {sortedClients.length === 0 && (
                   <tr>
                     <td colSpan={3} className="px-4 py-8 text-center text-muted">
                       Aucun client trouvé.
